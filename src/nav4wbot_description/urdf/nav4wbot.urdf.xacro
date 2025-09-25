@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="nav4wbot">
+  <xacro:property name="wheel_radius" value="0.1"/>
+  <xacro:property name="wheel_base" value="0.4"/>
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.5 0.3 0.1"/>
+      </geometry>
+      <material name="grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Four wheels -->
+  <xacro:macro name="wheel" params="name x y">
+    <link name="${name}">
+      <visual>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="0.05"/>
+        </geometry>
+        <material name="black"/>
+      </visual>
+    </link>
+    <joint name="${name}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${name}"/>
+      <origin xyz="${x} ${y} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wheel name="left_front_wheel" x="0.2" y="0.15"/>
+  <xacro:wheel name="left_rear_wheel" x="-0.2" y="0.15"/>
+  <xacro:wheel name="right_front_wheel" x="0.2" y="-0.15"/>
+  <xacro:wheel name="right_rear_wheel" x="-0.2" y="-0.15"/>
+
+  <!-- Diff drive controller plugin -->
+  <gazebo>
+    <plugin name="diff_drive_controller" filename="libgazebo_ros2_control_differential_drive.so">
+      <left_joint>left_front_wheel_joint</left_joint>
+      <right_joint>right_front_wheel_joint</right_joint>
+      <wheel_separation>${wheel_base}</wheel_separation>
+      <wheel_radius>${wheel_radius}</wheel_radius>
+      <enable_odometry>true</enable_odometry>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <publish_tf>true</publish_tf>
+    </plugin>
+  </gazebo>
+</robot>

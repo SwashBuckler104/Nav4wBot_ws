@@ -1,0 +1,61 @@
+amcl:
+  ros__parameters:
+    use_sim_time: true
+    min_particles: 500
+    max_particles: 2000
+    alpha1: 0.2
+    alpha2: 0.2
+    alpha3: 0.2
+    alpha4: 0.2
+    alpha5: 0.1
+    odom_frame_id: odom
+    base_frame_id: base_link
+    scan_topic: scan
+    update_min_d: 0.2
+    update_min_a: 0.2
+
+planner_server:
+  ros__parameters:
+    expected_planner_frequency: 20.0
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "nav2_navfn_planner/NavfnPlanner"
+
+controller_server:
+  ros__parameters:
+    controller_plugins: ["FollowPath"]
+
+    FollowPath:
+      plugin: "nav2_regulated_pure_pursuit_controller/Nav2RegulatedPurePursuitController"
+      lookahead_distance: 0.5
+
+bt_navigator:
+  ros__parameters:
+    plugin: "nav2_behavior_tree_navigator/BehaviorTreeNavigator"
+    default_bt_xml_filename: \"behavior_trees/navigate_w_replanning_and_recovery.xml\"
+
+recoveries_server:
+  ros__parameters:
+    plugin: "nav2_recoveries/Spin"
+    server_name: "recoveries"
+
+global_costmap:
+  ros__parameters:
+    global_costmap:
+      update_frequency: 1.0
+      publish_frequency: 1.0
+      rolling_window: false
+      width: 10
+      height: 10
+      resolution: 0.05
+
+local_costmap:
+  ros__parameters:
+    local_costmap:
+      update_frequency: 5.0
+      publish_frequency: 5.0
+      rolling_window: true
+      width: 6
+      height: 6
+      resolution: 0.05
+

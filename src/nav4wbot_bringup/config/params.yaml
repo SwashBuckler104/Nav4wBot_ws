@@ -1,0 +1,1 @@
+robot_description: '$(find nav4wbot_description)/urdf/nav4wbot.urdf.xacro'
