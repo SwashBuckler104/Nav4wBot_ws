@@ -40,3 +40,12 @@ sim_ws/
 
 # POA
 For now I am just adding all the files in src folder.. Note make pakages with pos2 create pkg and shift as per above demo strucutre.
+
+
+# ROS Cmds 
+colcon build
+source install/setup.bash 
+<!-- rviz -->
+ros2 launch nav4wbot_description display.launch.py 
+<!-- gazebo -->
+ros2 launch nav4wbot_gazebo gz_sim.launch.py

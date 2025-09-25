@@ -9,6 +9,8 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch.substitutions import Command, LaunchConfiguration
 
 def generate_launch_description():
+    # pkg_gazebo = get_package_share_directory("nav4wbot_gazebo")
+    # world_path = os.path.join(pkg_gazebo, "worlds", "empty.world.sdf")
     description_dir = get_package_share_directory("nav4wbot_description")
     model_arg = DeclareLaunchArgument(
         name="model", 
@@ -16,11 +18,17 @@ def generate_launch_description():
         description="Absolute path to robot URDF file"
     )
     
-    # Set GZ_SIM_RESOURCE_PATH to your workspace or package for resources (models, worlds, meshes)
     gazebo_resource_path = SetEnvironmentVariable(
         name="GZ_SIM_RESOURCE_PATH",
-        value=[str(Path(description_dir).parent.resolve())]
+        value=[
+            str(Path(description_dir).parent.resolve())
+        ]
     )
+
+    # gazebo_resource_path = SetEnvironmentVariable(
+    #     name="GZ_SIM_RESOURCE_PATH",
+    #     value="{}:/usr/share/ignition/gazebo/6/models".format(str(Path(description_dir).parent.resolve()))
+    # )
     
     robot_description = ParameterValue(
         Command(["xacro ", LaunchConfiguration("model")]),
@@ -35,10 +43,10 @@ def generate_launch_description():
     )
     
     gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            os.path.join(get_package_share_directory("ros_gz_sim"), "launch"), "/gz_sim.launch.py"
-        ]),
-        launch_arguments={"gz_args": " -v 4 -r empty.world.sdf"}.items(),
+        PythonLaunchDescriptionSource(
+            os.path.join(get_package_share_directory("ros_gz_sim"), "launch", "gz_sim.launch.py")
+        ),
+        launch_arguments=[("gz_args", [" -v 4 -r empty.sdf"])]
     )
     
     gz_spawn_entity = Node(

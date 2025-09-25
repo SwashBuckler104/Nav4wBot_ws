@@ -10,9 +10,9 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name, '/launch', ['launch/navigation.launch.py']),
-        ('share/' + package_name, '/config', ['config/nav2_params.yaml']),
-        ('share/' + package_name, '/maps', ['maps/test_map.yaml']), 
+        ('share/' + package_name + '/nav4wbot_navigation', ['nav4wbot_navigation/navigation.launch.py']),
+        ('share/' + package_name + '/config', ['config/nav2_params.yaml']),
+        ('share/' + package_name + '/maps', ['maps/test_map.yaml', 'maps/test_map.pgm']), 
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -26,7 +26,7 @@ setup(
         ],
     },
     entry_points={
-        'console_scripts': [
+        'console_scripts': [ 
         ],
     },
 )

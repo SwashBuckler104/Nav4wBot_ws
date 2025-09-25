@@ -7,7 +7,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch.substitutions import Command, LaunchConfiguration
 
 def generate_launch_description():
-    description_dir = get_package_share_directory("nav4wbot_description")
+    nav4wbot_description_dir = get_package_share_directory("nav4wbot_description")
     model_arg = DeclareLaunchArgument(
         name="model", 
         default_value=os.path.join(nav4wbot_description_dir, "urdf", "nav4wbot.urdf.xacro"),
@@ -31,7 +31,7 @@ def generate_launch_description():
     )
     
     # Try to locate the .rviz config file; RViz will fallback to default if not found
-    rviz_config = os.path.join(description_dir, "rviz", "nav4wbot.rviz")
+    rviz_config = os.path.join(nav4wbot_description_dir, "rviz", "nav4wbot.rviz")
     if os.path.isfile(rviz_config):
         rviz_args = ["-d", rviz_config]
     else:
