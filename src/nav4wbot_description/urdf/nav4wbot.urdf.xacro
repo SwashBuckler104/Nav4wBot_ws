@@ -1,14 +1,60 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="nav4wbot">
 
-  <!-- ============ Properties ============ -->
-  <xacro:property name="wheel_radius" value="0.1"/>
-  <xacro:property name="wheel_thickness" value="0.05"/>
-  <xacro:property name="wheel_base" value="0.4"/>   <!-- front-back distance -->
-  <xacro:property name="track_width" value="0.35"/>  <!-- left-right distance -->
+  <!-- Properties for dimensions -->
+  <xacro:property name="PI" value="3.14159" />
+  <xacro:property name="wheel_radius" value="0.1" />
+  <xacro:property name="wheel_thickness" value="0.05" />
+  <xacro:property name="wheel_base" value="0.4" />          <!-- front-back distance(change) -->
+  <xacro:property name="track_width" value="0.35" />        <!-- left-right distance(change) -->
 
-  <!-- ============ Base Link ============ -->
+  <!-- Macros Definations -->
+  <!-- Intertial Macro -->
+  <xacro:macro name="default_interial" params="mass">
+    <inertial>
+      <mass value="${mass}"/>
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+               iyy="0.01" iyz="0.0"
+               izz="0.01"/>
+    </inertial>
+  </xacro:macro>
+
+  <!--  Wheel Macro  -->
+  <xacro:macro name="wheel" params="name x y">
+    <link name="${name}">
+      <xacro:default_interial mass="1.0"/>
+      <visual>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_thickness}"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/> 
+        <material name="black">
+          <color rgba="0 0 0 1"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_thickness}"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+      </collision>
+    </link>
+
+    <joint name="${name}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${name}"/>
+      <origin xyz="${x} ${y} ${wheel_radius}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/> 
+    </joint>
+  </xacro:macro>
+
+  <!-- Robot Description -->
+
+  <link name="world"/>
+
+  <!-- Base Link -->
   <link name="base_link">
+    <xacro:default_interial mass="10.0"/>
     <visual>
       <geometry>
         <box size="0.5 0.3 0.1"/>
@@ -24,47 +70,15 @@
       </geometry>
       <origin xyz="0 0 0.1" rpy="0 0 0"/>
     </collision>
-    <inertial>
-      <mass value="10.0"/>
-    </inertial>
   </link>
 
-  <!-- ============ Wheel Macro ============ -->
-  <xacro:macro name="wheel" params="name x y">
-    <link name="${name}">
-      <visual>
-        <geometry>
-          <cylinder radius="${wheel_radius}" length="${wheel_thickness}"/>
-        </geometry>
-        <!-- Rotate cylinder so axis aligns with wheel axle -->
-        <origin xyz="0 0 0" rpy="1.5708 0 0"/> <!-- rotate 90deg about x -->
-        <material name="black">
-          <color rgba="0 0 0 1"/>
-        </material>
-      </visual>
-      <collision>
-        <geometry>
-          <cylinder radius="${wheel_radius}" length="${wheel_thickness}"/>
-        </geometry>
-        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
-      </collision>
-      <inertial>
-        <mass value="1.0"/>
-        <inertia ixx="0.01" ixy="0.0" ixz="0.0"
-                 iyy="0.01" iyz="0.0"
-                 izz="0.01"/>
-      </inertial>
-    </link>
+  <joint name="virtual_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
 
-    <joint name="${name}_joint" type="continuous">
-      <parent link="base_link"/>
-      <child link="${name}"/>
-      <origin xyz="${x} ${y} ${wheel_radius}" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/> <!-- wheel rotates around y-axis -->
-    </joint>
-  </xacro:macro>
-
-  <!-- ============ Wheels ============ -->
+  <!--  Wheels  -->
   <xacro:wheel name="left_front_wheel"  x="0.2"  y="0.175"/>
   <xacro:wheel name="left_rear_wheel"   x="-0.2" y="0.175"/>
   <xacro:wheel name="right_front_wheel" x="0.2"  y="-0.175"/>
@@ -72,6 +86,7 @@
 
   <!-- ============ Lidar Sensor ============ -->
   <link name="lidar_link">
+    <xacro:default_interial mass="0.5"/>
     <visual>
       <geometry>
         <cylinder radius="0.05" length="0.1"/>
@@ -91,6 +106,8 @@
 
   <!-- Gazebo plugin for Lidar -->
   <gazebo reference="lidar_link">
+    <!-- Note my gazebo is ign gazebo, so change the plugin as needed -->
+    <plugin name="gazebo_ros_laser" filename="libgazebo_ros_ray_sensor.so"/>
     <sensor type="gpu_ray" name="lidar_sensor">
       <update_rate>10</update_rate>
       <ray>
@@ -108,7 +125,6 @@
           <resolution>0.01</resolution>
         </range>
       </ray>
-      <plugin name="gazebo_ros_laser" filename="libgazebo_ros_ray_sensor.so"/>
     </sensor>
   </gazebo>
 
@@ -119,7 +135,8 @@
       <left_joint>left_rear_wheel_joint</left_joint>
       <right_joint>right_front_wheel_joint</right_joint>
       <right_joint>right_rear_wheel_joint</right_joint>
-      <wheel_separation>${wheel_base}</wheel_separation>
+      <wheel_separation>${wheel_base}</wheel_separation>     <!--see if this is track_width -->
+      <!-- <track_width>${track_width}</track_width> -->
       <wheel_radius>${wheel_radius}</wheel_radius>
       <enable_odometry>true</enable_odometry>
       <odometry_frame>odom</odometry_frame>
